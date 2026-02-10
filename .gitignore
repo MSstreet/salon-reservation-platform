@@ -1,0 +1,24 @@
+# Environment variables
+.env
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Build
+target/
+build/
+.gradle/
+
+# Spring Boot
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+application-secret.yml
