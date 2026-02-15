@@ -1,0 +1,10 @@
+package com.salon.domain.enums;
+
+public enum EventType {
+    RESERVATION_CREATED,
+    RESERVATION_CONFIRMED,
+    RESERVATION_COMPLETED,
+    RESERVATION_CANCELED,
+    NO_SHOW_MARKED,
+    PENALTY_CALCULATED
+}
