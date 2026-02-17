@@ -3,9 +3,10 @@ package com.salon.domain.entity;
 import com.salon.domain.enums.StoreStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "store",
@@ -25,17 +26,21 @@ public class Store extends BaseTimeEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     private StoreStatus status;
 
     @Column(nullable = false, length = 50)
     private String timezone;
 
-    @Builder
-    public Store(String name, StoreStatus status, String timezone) {
+    private Store(String name, StoreStatus status, String timezone) {
         this.name = name;
         this.status = status;
         this.timezone = timezone;
+    }
+
+    public static Store create(String name, StoreStatus status, String timezone) {
+        return new Store(name, status, timezone);
     }
 
     public void update(String name, StoreStatus status, String timezone) {

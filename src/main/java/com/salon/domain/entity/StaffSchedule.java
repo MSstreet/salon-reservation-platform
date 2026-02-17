@@ -3,9 +3,10 @@ package com.salon.domain.entity;
 import com.salon.domain.enums.ScheduleType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -46,17 +47,22 @@ public class StaffSchedule extends BaseTimeEntity {
     private LocalTime endTime;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 10)
     private ScheduleType type;
 
-    @Builder
-    public StaffSchedule(Store store, Staff staff, LocalDate date,
-                         LocalTime startTime, LocalTime endTime, ScheduleType type) {
+    private StaffSchedule(Store store, Staff staff, LocalDate date,
+                          LocalTime startTime, LocalTime endTime, ScheduleType type) {
         this.store = store;
         this.staff = staff;
         this.date = date;
         this.startTime = startTime;
         this.endTime = endTime;
         this.type = type;
+    }
+
+    public static StaffSchedule create(Store store, Staff staff, LocalDate date,
+                                        LocalTime startTime, LocalTime endTime, ScheduleType type) {
+        return new StaffSchedule(store, staff, date, startTime, endTime, type);
     }
 }

@@ -2,30 +2,38 @@ package com.salon.api.store.dto;
 
 import com.salon.domain.entity.Store;
 import com.salon.domain.enums.StoreStatus;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Builder
 public class StoreResponse {
 
-    private Long id;
-    private String name;
-    private StoreStatus status;
-    private String timezone;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private final Long id;
+    private final String name;
+    private final StoreStatus status;
+    private final String timezone;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
+
+    private StoreResponse(Long id, String name, StoreStatus status, String timezone,
+                          LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+        this.timezone = timezone;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     public static StoreResponse from(Store store) {
-        return StoreResponse.builder()
-                .id(store.getId())
-                .name(store.getName())
-                .status(store.getStatus())
-                .timezone(store.getTimezone())
-                .createdAt(store.getCreatedAt())
-                .updatedAt(store.getUpdatedAt())
-                .build();
+        return new StoreResponse(
+                store.getId(),
+                store.getName(),
+                store.getStatus(),
+                store.getTimezone(),
+                store.getCreatedAt(),
+                store.getUpdatedAt()
+        );
     }
 }

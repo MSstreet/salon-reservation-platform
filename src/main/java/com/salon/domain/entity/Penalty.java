@@ -3,9 +3,10 @@ package com.salon.domain.entity;
 import com.salon.domain.enums.PenaltyType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -39,6 +40,7 @@ public class Penalty {
     private PolicyVersion policyVersion;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     private PenaltyType type;
 
@@ -57,10 +59,9 @@ public class Penalty {
     @Column(columnDefinition = "TEXT")
     private String basisJson;
 
-    @Builder
-    public Penalty(Store store, Reservation reservation, PolicyVersion policyVersion,
-                   PenaltyType type, Integer ratePercent, Integer amount, String currency,
-                   LocalDateTime calculatedAt, String basisJson) {
+    private Penalty(Store store, Reservation reservation, PolicyVersion policyVersion,
+                    PenaltyType type, Integer ratePercent, Integer amount, String currency,
+                    LocalDateTime calculatedAt, String basisJson) {
         this.store = store;
         this.reservation = reservation;
         this.policyVersion = policyVersion;
@@ -70,5 +71,12 @@ public class Penalty {
         this.currency = currency;
         this.calculatedAt = calculatedAt;
         this.basisJson = basisJson;
+    }
+
+    public static Penalty create(Store store, Reservation reservation, PolicyVersion policyVersion,
+                                  PenaltyType type, Integer ratePercent, Integer amount, String currency,
+                                  LocalDateTime calculatedAt, String basisJson) {
+        return new Penalty(store, reservation, policyVersion, type, ratePercent, amount, currency,
+                calculatedAt, basisJson);
     }
 }

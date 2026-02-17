@@ -3,9 +3,10 @@ package com.salon.domain.entity;
 import com.salon.domain.enums.SlotStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,19 +48,24 @@ public class TimeSlot extends BaseTimeEntity {
     private LocalDateTime endAt;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 10)
     private SlotStatus status;
 
     private LocalDateTime heldUntil;
 
-    @Builder
-    public TimeSlot(Store store, Staff staff, LocalDate date,
-                    LocalDateTime startAt, LocalDateTime endAt, SlotStatus status) {
+    private TimeSlot(Store store, Staff staff, LocalDate date,
+                     LocalDateTime startAt, LocalDateTime endAt, SlotStatus status) {
         this.store = store;
         this.staff = staff;
         this.date = date;
         this.startAt = startAt;
         this.endAt = endAt;
         this.status = status;
+    }
+
+    public static TimeSlot create(Store store, Staff staff, LocalDate date,
+                                   LocalDateTime startAt, LocalDateTime endAt, SlotStatus status) {
+        return new TimeSlot(store, staff, date, startAt, endAt, status);
     }
 }

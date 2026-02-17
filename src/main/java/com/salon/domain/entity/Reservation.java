@@ -3,9 +3,10 @@ package com.salon.domain.entity;
 import com.salon.domain.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -59,16 +60,16 @@ public class Reservation extends BaseTimeEntity {
     private LocalDateTime endAt;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     private ReservationStatus status;
 
     @Column(length = 500)
     private String cancelReason;
 
-    @Builder
-    public Reservation(Store store, Staff staff, ServiceProduct product, TimeSlot slot,
-                       PolicyVersion policyVersion, String customerName, String customerPhoneHash,
-                       LocalDateTime startAt, LocalDateTime endAt, ReservationStatus status) {
+    private Reservation(Store store, Staff staff, ServiceProduct product, TimeSlot slot,
+                        PolicyVersion policyVersion, String customerName, String customerPhoneHash,
+                        LocalDateTime startAt, LocalDateTime endAt, ReservationStatus status) {
         this.store = store;
         this.staff = staff;
         this.product = product;
@@ -79,5 +80,12 @@ public class Reservation extends BaseTimeEntity {
         this.startAt = startAt;
         this.endAt = endAt;
         this.status = status;
+    }
+
+    public static Reservation create(Store store, Staff staff, ServiceProduct product, TimeSlot slot,
+                                      PolicyVersion policyVersion, String customerName, String customerPhoneHash,
+                                      LocalDateTime startAt, LocalDateTime endAt, ReservationStatus status) {
+        return new Reservation(store, staff, product, slot, policyVersion, customerName, customerPhoneHash,
+                startAt, endAt, status);
     }
 }

@@ -4,9 +4,10 @@ import com.salon.domain.enums.ActorType;
 import com.salon.domain.enums.EventType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class ReservationHistory {
     private Reservation reservation;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "event_type", nullable = false, length = 30)
     private EventType eventType;
 
@@ -43,6 +45,7 @@ public class ReservationHistory {
     private LocalDateTime occurredAt;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     private ActorType actorType;
 
@@ -52,10 +55,9 @@ public class ReservationHistory {
     @Column(columnDefinition = "TEXT")
     private String payloadJson;
 
-    @Builder
-    public ReservationHistory(Store store, Reservation reservation, EventType eventType,
-                            LocalDateTime occurredAt, ActorType actorType, String actorId,
-                            String payloadJson) {
+    private ReservationHistory(Store store, Reservation reservation, EventType eventType,
+                               LocalDateTime occurredAt, ActorType actorType, String actorId,
+                               String payloadJson) {
         this.store = store;
         this.reservation = reservation;
         this.eventType = eventType;
@@ -63,5 +65,11 @@ public class ReservationHistory {
         this.actorType = actorType;
         this.actorId = actorId;
         this.payloadJson = payloadJson;
+    }
+
+    public static ReservationHistory create(Store store, Reservation reservation, EventType eventType,
+                                             LocalDateTime occurredAt, ActorType actorType, String actorId,
+                                             String payloadJson) {
+        return new ReservationHistory(store, reservation, eventType, occurredAt, actorType, actorId, payloadJson);
     }
 }
