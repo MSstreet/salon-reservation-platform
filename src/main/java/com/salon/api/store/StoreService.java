@@ -20,16 +20,6 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
 
-    @Transactional
-    public StoreResponse create(StoreCreateRequest request) {
-        Store store = Store.builder()
-                .name(request.getName())
-                .status(StoreStatus.ACTIVE)
-                .timezone(request.getTimezone())
-                .build();
-        return StoreResponse.from(storeRepository.save(store));
-    }
-
     public StoreResponse getById(Long storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new EntityNotFoundException("Store not found: " + storeId));
@@ -42,18 +32,4 @@ public class StoreService {
                 .toList();
     }
 
-    @Transactional
-    public StoreResponse update(Long storeId, StoreUpdateRequest request) {
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new EntityNotFoundException("Store not found: " + storeId));
-        store.update(request.getName(), request.getStatus(), request.getTimezone());
-        return StoreResponse.from(store);
-    }
-
-    @Transactional
-    public void delete(Long storeId) {
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new EntityNotFoundException("Store not found: " + storeId));
-        storeRepository.delete(store);
-    }
 }
