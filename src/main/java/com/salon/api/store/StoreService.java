@@ -26,8 +26,13 @@ public class StoreService {
         return StoreResponse.from(store);
     }
 
-    public List<StoreResponse> getAll() {
-        return storeRepository.findAll().stream()
+    public List<StoreResponse> getAll(StoreStatus status) {
+        if (status != null) {
+            return storeRepository.findByStatus(status).stream()
+                    .map(StoreResponse::from)
+                    .toList();
+        }
+        return storeRepository.findByStatus(StoreStatus.ACTIVE).stream()
                 .map(StoreResponse::from)
                 .toList();
     }
