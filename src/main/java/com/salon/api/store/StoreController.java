@@ -1,6 +1,8 @@
 package com.salon.api.store;
 
 import com.salon.api.store.dto.StoreResponse;
+import com.salon.common.response.ApiResponse;
+import com.salon.domain.enums.StoreStatus;
 import com.salon.security.StoreAccessValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +25,9 @@ public class StoreController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StoreResponse>> getAll() {
-        return ResponseEntity.ok(storeService.getAll());
+    public ResponseEntity<ApiResponse<List<StoreResponse>>> getAll(
+            @RequestParam(required = false) StoreStatus status) {
+        return ResponseEntity.ok(ApiResponse.success(storeService.getAll(status)));
     }
 
 

@@ -47,6 +47,10 @@ public class Reservation extends BaseTimeEntity {
     @JoinColumn(name = "policy_version_id", nullable = false)
     private PolicyVersion policyVersion;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reservation_customer_id")
+    private ReservationCustomer reservationCustomer;
+
     @Column(nullable = false, length = 50)
     private String customerName;
 
@@ -68,13 +72,15 @@ public class Reservation extends BaseTimeEntity {
     private String cancelReason;
 
     private Reservation(Store store, Staff staff, ServiceProduct product, TimeSlot slot,
-                        PolicyVersion policyVersion, String customerName, String customerPhoneHash,
+                        PolicyVersion policyVersion, ReservationCustomer reservationCustomer,
+                        String customerName, String customerPhoneHash,
                         LocalDateTime startAt, LocalDateTime endAt, ReservationStatus status) {
         this.store = store;
         this.staff = staff;
         this.product = product;
         this.slot = slot;
         this.policyVersion = policyVersion;
+        this.reservationCustomer = reservationCustomer;
         this.customerName = customerName;
         this.customerPhoneHash = customerPhoneHash;
         this.startAt = startAt;
@@ -83,9 +89,10 @@ public class Reservation extends BaseTimeEntity {
     }
 
     public static Reservation create(Store store, Staff staff, ServiceProduct product, TimeSlot slot,
-                                      PolicyVersion policyVersion, String customerName, String customerPhoneHash,
+                                      PolicyVersion policyVersion, ReservationCustomer reservationCustomer,
+                                      String customerName, String customerPhoneHash,
                                       LocalDateTime startAt, LocalDateTime endAt, ReservationStatus status) {
-        return new Reservation(store, staff, product, slot, policyVersion, customerName, customerPhoneHash,
-                startAt, endAt, status);
+        return new Reservation(store, staff, product, slot, policyVersion, reservationCustomer,
+                customerName, customerPhoneHash, startAt, endAt, status);
     }
 }

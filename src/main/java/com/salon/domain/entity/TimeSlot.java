@@ -1,5 +1,7 @@
 package com.salon.domain.entity;
 
+import com.salon.common.exception.BusinessException;
+import com.salon.common.exception.ErrorCode;
 import com.salon.domain.enums.SlotStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -67,5 +69,12 @@ public class TimeSlot extends BaseTimeEntity {
     public static TimeSlot create(Store store, Staff staff, LocalDate date,
                                    LocalDateTime startAt, LocalDateTime endAt, SlotStatus status) {
         return new TimeSlot(store, staff, date, startAt, endAt, status);
+    }
+
+    public void book() {
+        if (this.status != SlotStatus.OPEN) {
+            throw new BusinessException(ErrorCode.SLOT_CONFLICT);
+        }
+        this.status = SlotStatus.BOOKED;
     }
 }

@@ -124,7 +124,76 @@
 
 # 6. APIs
 
-## 6.1 Slot 조회 (고객)
+## 6.1 매장 목록 조회 (고객)
+
+### GET `/stores`
+
+고객이 예약할 매장을 선택하기 위한 매장 목록 조회
+
+**Auth**: Optional (로그인 없어도 조회 가능)
+**Query**
+
+* `status` (optional) `ACTIVE|INACTIVE` — 미지정 시 ACTIVE만 반환
+
+**Response 200**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "storeId": 1,
+      "name": "Salon A",
+      "status": "ACTIVE",
+      "timezone": "Asia/Seoul"
+    }
+  ],
+  "error": null,
+  "meta": { "requestId": "req-1", "timestamp": "..." }
+}
+```
+
+**Errors**
+
+* 없음
+
+---
+
+## 6.2 디자이너 목록 조회 (고객)
+
+### GET `/stores/{storeId}/designers`
+
+고객이 매장을 선택한 뒤 해당 매장의 디자이너 목록을 조회
+
+**Auth**: Optional (로그인 없어도 조회 가능)
+
+**Response 200**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "staffId": 55,
+      "name": "Designer B",
+      "role": "DESIGNER",
+      "status": "ACTIVE"
+    }
+  ],
+  "error": null,
+  "meta": { "requestId": "req-1", "timestamp": "..." }
+}
+```
+
+> ACTIVE 상태의 DESIGNER 역할만 반환합니다.
+
+**Errors**
+
+* `404 STORE_NOT_FOUND`
+
+---
+
+## 6.3 Slot 조회 (고객)
 
 ### GET `/stores/{storeId}/slots`
 
@@ -134,7 +203,7 @@
 **Query**
 
 * `date` (required) `YYYY-MM-DD`
-* `staffId` (optional)
+* `staffId` (required)
 * `menuId` (required)  // duration 기반으로 예약 가능 범위를 판단
 * `from` (optional) `HH:mm`
 * `to` (optional) `HH:mm`
@@ -172,7 +241,7 @@
 
 ---
 
-## 6.2 예약 생성 (고객)
+## 6.4 예약 생성 (고객)
 
 ### POST `/stores/{storeId}/reservations`
 
@@ -232,7 +301,7 @@
 
 ---
 
-## 6.3 예약 취소 (고객)
+## 6.5 예약 취소 (고객)
 
 ### POST `/stores/{storeId}/reservations/{reservationId}/cancel`
 
@@ -283,7 +352,7 @@
 
 ---
 
-## 6.4 예약 상태 변경 (매장 운영/어드민)
+## 6.6 예약 상태 변경 (매장 운영/어드민)
 
 ### POST `/stores/{storeId}/reservations/{reservationId}/status`
 
@@ -332,7 +401,7 @@
 
 ---
 
-## 6.5 정책 등록(버전 생성) (플랫폼/어드민)
+## 6.7 정책 등록(버전 생성) (플랫폼/어드민)
 
 ### POST `/stores/{storeId}/policies/cancellation-no-show/versions`
 
@@ -380,7 +449,7 @@
 
 ---
 
-## 6.6 어드민 예약 검색 (운영 조회)
+## 6.8 어드민 예약 검색 (운영 조회)
 
 ### GET `/admin/reservations`
 
@@ -432,6 +501,132 @@
 
 * `403 AUTH_FORBIDDEN`
 * `400 INVALID_REQUEST`
+
+---
+
+## 6.9 예약 고객 상세 조회
+
+### GET `/reservation-customers/{customerId}`
+
+예약 고객 정보 및 예약 이력 확인용
+
+**Auth**: `CUSTOMER` (본인) or `STORE_ADMIN` or `ADMIN`
+
+**Response 200**
+
+```json
+{
+  "success": true,
+  "data": {
+    "customerId": 1,
+    "name": "Kim",
+    "phone": "01012341234",
+    "email": "kim@example.com",
+    "createdAt": "2026-02-21T10:00:00"
+  },
+  "error": null,
+  "meta": { "requestId": "req-8", "timestamp": "..." }
+}
+```
+
+**Errors**
+
+* `404 RESERVATION_CUSTOMER_NOT_FOUND`
+* `403 AUTH_FORBIDDEN` — 본인이 아닌 고객 정보 접근
+
+---
+
+## 6.10 예약 고객 예약 내역 조회
+
+### GET `/reservation-customers/{customerId}/reservations`
+
+특정 예약 고객의 예약 내역 목록 조회
+
+**Auth**: `CUSTOMER` (본인) or `STORE_ADMIN` or `ADMIN`
+**Query**
+
+* `status` (optional) `REQUESTED|CONFIRMED|COMPLETED|CANCELED|NO_SHOW`
+* `from` (optional) `YYYY-MM-DD`
+* `to` (optional) `YYYY-MM-DD`
+* `page` (default: 0)
+* `size` (default: 20)
+
+**Response 200**
+
+```json
+{
+  "success": true,
+  "data": {
+    "page": 0,
+    "size": 20,
+    "totalElements": 5,
+    "items": [
+      {
+        "reservationId": 9001,
+        "storeId": 1,
+        "storeName": "Salon A",
+        "staffName": "Designer B",
+        "menuName": "Cut",
+        "startAt": "2026-02-15T10:00:00",
+        "endAt": "2026-02-15T11:00:00",
+        "status": "CONFIRMED",
+        "createdAt": "2026-02-10T12:00:00"
+      }
+    ]
+  },
+  "error": null,
+  "meta": { "requestId": "req-9", "timestamp": "..." }
+}
+```
+
+**Errors**
+
+* `404 RESERVATION_CUSTOMER_NOT_FOUND`
+* `403 AUTH_FORBIDDEN`
+
+---
+
+## 6.11 매장별 예약 고객 목록 조회 (매장 운영)
+
+### GET `/stores/{storeId}/reservation-customers`
+
+해당 매장에 예약한 적 있는 예약 고객 목록 조회 (STORE_ADMIN용)
+
+**Auth**: `STORE_ADMIN` or `ADMIN`
+**Query**
+
+* `q` (optional) 고객명/전화번호 검색
+* `page` (default: 0)
+* `size` (default: 20)
+
+**Response 200**
+
+```json
+{
+  "success": true,
+  "data": {
+    "page": 0,
+    "size": 20,
+    "totalElements": 50,
+    "items": [
+      {
+        "customerId": 1,
+        "name": "Kim",
+        "phone": "01012341234",
+        "totalReservations": 5,
+        "lastVisitAt": "2026-02-15T10:00:00"
+      }
+    ]
+  },
+  "error": null,
+  "meta": { "requestId": "req-10", "timestamp": "..." }
+}
+```
+
+**Errors**
+
+* `404 STORE_NOT_FOUND`
+* `403 AUTH_FORBIDDEN`
 
 ---
 

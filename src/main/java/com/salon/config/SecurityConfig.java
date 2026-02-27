@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/health", "/api/health/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/api/stores", "/api/stores/{storeId}/designers", "/api/stores/{storeId}/time-slots").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
