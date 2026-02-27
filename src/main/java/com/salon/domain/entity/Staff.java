@@ -4,9 +4,10 @@ import com.salon.domain.enums.StaffRole;
 import com.salon.domain.enums.StaffStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "staff",
@@ -33,18 +34,23 @@ public class Staff extends BaseTimeEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     private StaffRole role;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     private StaffStatus status;
 
-    @Builder
-    public Staff(Store store, String name, StaffRole role, StaffStatus status) {
+    private Staff(Store store, String name, StaffRole role, StaffStatus status) {
         this.store = store;
         this.name = name;
         this.role = role;
         this.status = status;
+    }
+
+    public static Staff create(Store store, String name, StaffRole role, StaffStatus status) {
+        return new Staff(store, name, role, status);
     }
 }

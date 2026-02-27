@@ -2,7 +2,6 @@ package com.salon.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -47,13 +46,17 @@ public class PolicyVersion {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Builder
-    public PolicyVersion(Store store, Integer version, LocalDateTime effectiveFrom,
-                         String rulesJson, String createdBy) {
+    private PolicyVersion(Store store, Integer version, LocalDateTime effectiveFrom,
+                          String rulesJson, String createdBy) {
         this.store = store;
         this.version = version;
         this.effectiveFrom = effectiveFrom;
         this.rulesJson = rulesJson;
         this.createdBy = createdBy;
+    }
+
+    public static PolicyVersion create(Store store, Integer version, LocalDateTime effectiveFrom,
+                                        String rulesJson, String createdBy) {
+        return new PolicyVersion(store, version, effectiveFrom, rulesJson, createdBy);
     }
 }
