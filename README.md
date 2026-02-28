@@ -56,6 +56,19 @@
 
 ---
 
+## API Docs (Swagger UI)
+
+| 모듈 | 환경 | URL |
+|---|---|---|
+| API (고객용) | 로컬 | http://localhost:8080/swagger-ui/index.html |
+| API (고객용) | 개발계 | http://{DEV_API_HOST}/swagger-ui/index.html |
+| Admin (관리자용) | 로컬 | http://localhost:8081/swagger-ui/index.html |
+| Admin (관리자용) | 개발계 | http://{DEV_ADMIN_HOST}/swagger-ui/index.html |
+
+> `{DEV_API_HOST}` / `{DEV_ADMIN_HOST}` 는 개발계 배포 후 실제 도메인으로 교체
+
+---
+
 ## Tech Stack
 
 - **Backend**: Spring Boot, JPA
