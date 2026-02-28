@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: salon-admin
+
+  profiles:
+    active: local
+
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+jwt:
+  secret: ${JWT_SECRET:dev-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm}
+  expiration-ms: 3600000
