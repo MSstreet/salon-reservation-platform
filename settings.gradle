@@ -1,1 +1,2 @@
 rootProject.name = 'salon-reservation-platform'
+include 'core', 'api', 'admin'
