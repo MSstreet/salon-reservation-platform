@@ -36,6 +36,7 @@ public class ApiSecurityConfig {
                         .requestMatchers("/api/health", "/api/health/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/stores", "/api/stores/{storeId}/designers", "/api/stores/{storeId}/time-slots").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
