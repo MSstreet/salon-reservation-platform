@@ -1,0 +1,96 @@
+name: CD - Dev
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-push:
+    name: Build & Push to ECR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push salon-api
+        run: |
+          docker build -f api/Dockerfile \
+            -t $ECR_REGISTRY/salon-api:$IMAGE_TAG \
+            -t $ECR_REGISTRY/salon-api:latest \
+            .
+          docker push $ECR_REGISTRY/salon-api:$IMAGE_TAG
+          docker push $ECR_REGISTRY/salon-api:latest
+
+      - name: Build & Push salon-admin
+        run: |
+          docker build -f admin/Dockerfile \
+            -t $ECR_REGISTRY/salon-admin:$IMAGE_TAG \
+            -t $ECR_REGISTRY/salon-admin:latest \
+            .
+          docker push $ECR_REGISTRY/salon-admin:$IMAGE_TAG
+          docker push $ECR_REGISTRY/salon-admin:latest
+
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose.dev.yml to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEV_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEV_EC2_SSH_KEY }}
+          source: docker-compose.dev.yml
+          target: ~/app/
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEV_EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEV_EC2_SSH_KEY }}
+          envs: ECR_REGISTRY,IMAGE_TAG,AWS_REGION
+          script: |
+            # ECR 로그인 (EC2 IAM Role 사용)
+            aws ecr get-login-password --region $AWS_REGION \
+              | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            cd ~/app
+
+            # 환경변수 파일 생성
+            cat > .env <<EOF
+            ECR_REGISTRY=$ECR_REGISTRY
+            IMAGE_TAG=$IMAGE_TAG
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            EOF
+
+            # 새 이미지 pull 및 재시작
+            docker compose -f docker-compose.dev.yml pull salon-api salon-admin
+            docker compose -f docker-compose.dev.yml up -d
+
+            # 오래된 이미지 정리
+            docker image prune -f

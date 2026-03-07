@@ -15,6 +15,7 @@
 ## 2. 엔티티 목록
 
 - `Store` : 입점 매장
+- `ReservationCustomer` : 예약 고객 (예약을 통해 등록된 고객 정보)
 - `Staff` : 디자이너/직원
 - `ServiceMenu` : 시술 메뉴(커트/염색 등)
 - `StaffSchedule` : 디자이너 근무/휴무 스케줄
@@ -43,7 +44,23 @@
 
 ---
 
-### 3.2 Staff
+### 3.2 ReservationCustomer
+- **PK**: `reservation_customer_id`
+- 컬럼(예시):
+  - `reservation_customer_id` (BIGINT)
+  - `name` (VARCHAR)
+  - `phone` (VARCHAR)              // 연락처
+  - `phone_hash` (VARCHAR)         // 검색/매칭용 해시
+  - `email` (VARCHAR, nullable)
+  - `created_at`, `updated_at`
+- **인덱스**
+  - `uq_res_customer_phone_hash (phone_hash)` — 동일 전화번호 중복 등록 방지
+
+> 예약 고객은 매장에 종속되지 않습니다. 여러 매장에 예약할 수 있으므로 `store_id` FK가 없습니다.
+
+---
+
+### 3.3 Staff
 - **PK**: `staff_id`
 - **FK**: `store_id -> Store.store_id`
 - 컬럼(예시):
@@ -59,7 +76,7 @@
 
 ---
 
-### 3.3 ServiceMenu
+### 3.4 ServiceMenu
 - **PK**: `menu_id`
 - **FK**: `store_id -> Store.store_id`
 - 컬럼(예시):
@@ -76,7 +93,7 @@
 
 ---
 
-### 3.4 StaffSchedule
+### 3.5 StaffSchedule
 - **PK**: `schedule_id`
 - **FK**: `store_id -> Store.store_id`
 - **FK**: `staff_id -> Staff.staff_id`
@@ -96,7 +113,7 @@
 
 ---
 
-### 3.5 TimeSlot
+### 3.6 TimeSlot
 - **PK**: `slot_id`
 - **FK**: `store_id -> Store.store_id`
 - **FK**: `staff_id -> Staff.staff_id`
@@ -122,10 +139,11 @@
 
 ---
 
-### 3.6 Reservation
+### 3.7 Reservation
 - **PK**: `reservation_id`
 - **FK**: `store_id -> Store.store_id`
 - **FK**: `staff_id -> Staff.staff_id`
+- **FK**: `reservation_customer_id -> ReservationCustomer.reservation_customer_id`
 - **FK**: `menu_id -> ServiceMenu.menu_id`
 - **FK(권장)**: `slot_id -> TimeSlot.slot_id` (선택: 대표 슬롯만 연결)
 - **FK(핵심)**: `policy_version_id -> PolicyVersion.policy_version_id`  // 예약 확정 시점 정책 고정
@@ -133,10 +151,10 @@
   - `reservation_id` (BIGINT)
   - `store_id` (BIGINT)
   - `staff_id` (BIGINT)
+  - `reservation_customer_id` (BIGINT)
   - `menu_id` (BIGINT)
   - `slot_id` (BIGINT, nullable)
-  - `customer_id` (BIGINT 또는 VARCHAR)  // MVP는 간단히
-  - `customer_name` (VARCHAR)
+  - `customer_name` (VARCHAR)            // 비정규화: 조회 성능용
   - `customer_phone_hash` (VARCHAR)      // 개인정보 보호(해시)
   - `start_at` (DATETIME)
   - `end_at` (DATETIME)
@@ -154,7 +172,7 @@
 
 ---
 
-### 3.7 PolicyVersion
+### 3.8 PolicyVersion
 - **PK**: `policy_version_id`
 - **FK**: `store_id -> Store.store_id`
 - 컬럼(예시):
@@ -173,7 +191,7 @@
 
 ---
 
-### 3.8 Penalty
+### 3.9 Penalty
 - **PK**: `penalty_id`
 - **FK**: `store_id -> Store.store_id`
 - **FK**: `reservation_id -> Reservation.reservation_id`
@@ -195,7 +213,7 @@
 
 ---
 
-### 3.9 ReservationEvent (Audit Log)
+### 3.10 ReservationEvent (Audit Log)
 - **PK**: `event_id` (UUID 권장) 또는 BIGINT + UUID 보조키
 - **FK**: `store_id -> Store.store_id`
 - **FK**: `reservation_id -> Reservation.reservation_id`
@@ -228,6 +246,8 @@ erDiagram
     STORE ||--o{ PENALTY : generates
     STORE ||--o{ RESERVATION_EVENT : logs
 
+    RESERVATION_CUSTOMER ||--o{ RESERVATION : makes
+
     STAFF ||--o{ STAFF_SCHEDULE : works
     STAFF ||--o{ TIME_SLOT : opens
     STAFF ||--o{ RESERVATION : serves
@@ -247,6 +267,16 @@ erDiagram
         VARCHAR name
         VARCHAR timezone
         ENUM status
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    RESERVATION_CUSTOMER {
+        BIGINT reservation_customer_id PK
+        VARCHAR name
+        VARCHAR phone
+        VARCHAR phone_hash
+        VARCHAR email
         DATETIME created_at
         DATETIME updated_at
     }
@@ -310,6 +340,7 @@ erDiagram
     RESERVATION {
         BIGINT reservation_id PK
         BIGINT store_id FK
+        BIGINT reservation_customer_id FK
         BIGINT staff_id FK
         BIGINT menu_id FK
         BIGINT slot_id FK
