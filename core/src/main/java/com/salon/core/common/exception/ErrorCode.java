@@ -17,15 +17,18 @@ public enum ErrorCode {
     // 404 Not Found
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_NOT_FOUND", "매장을 찾을 수 없습니다"),
     STAFF_NOT_FOUND(HttpStatus.NOT_FOUND, "STAFF_NOT_FOUND", "스태프를 찾을 수 없습니다"),
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND", "서비스 상품을 찾을 수 없습니다"),
+    MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "MENU_NOT_FOUND", "서비스 메뉴를 찾을 수 없습니다"),
     SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "SLOT_NOT_FOUND", "타임슬롯을 찾을 수 없습니다"),
-    POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "POLICY_NOT_FOUND", "유효한 정책을 찾을 수 없습니다"),
+    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION_NOT_FOUND", "예약을 찾을 수 없습니다"),
+    DEPOSIT_NOT_FOUND(HttpStatus.NOT_FOUND, "DEPOSIT_NOT_FOUND", "예약금 정보를 찾을 수 없습니다"),
 
     // 400 Bad Request
     STAFF_STORE_MISMATCH(HttpStatus.BAD_REQUEST, "STAFF_STORE_MISMATCH", "스태프가 해당 매장 소속이 아닙니다"),
-    PRODUCT_STORE_MISMATCH(HttpStatus.BAD_REQUEST, "PRODUCT_STORE_MISMATCH", "상품이 해당 매장 소속이 아닙니다"),
+    MENU_STORE_MISMATCH(HttpStatus.BAD_REQUEST, "MENU_STORE_MISMATCH", "메뉴가 해당 매장 소속이 아닙니다"),
     SLOT_STORE_MISMATCH(HttpStatus.BAD_REQUEST, "SLOT_STORE_MISMATCH", "슬롯이 해당 매장 소속이 아닙니다"),
     SLOT_STAFF_MISMATCH(HttpStatus.BAD_REQUEST, "SLOT_STAFF_MISMATCH", "슬롯이 해당 스태프의 것이 아닙니다"),
+    RESERVATION_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "RESERVATION_CANNOT_CANCEL", "취소할 수 없는 예약 상태입니다"),
+    RESERVATION_INVALID_STATUS(HttpStatus.BAD_REQUEST, "RESERVATION_INVALID_STATUS", "유효하지 않은 예약 상태 전이입니다"),
 
     // ReservationCustomer
     RESERVATION_CUSTOMER_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION_CUSTOMER_NOT_FOUND", "예약 고객을 찾을 수 없습니다");

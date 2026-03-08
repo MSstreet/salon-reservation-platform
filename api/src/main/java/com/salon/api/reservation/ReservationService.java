@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -20,9 +18,8 @@ public class ReservationService {
 
     private final StoreRepository storeRepository;
     private final StaffRepository staffRepository;
-    private final ServiceProductRepository serviceProductRepository;
+    private final ServiceMenuRepository serviceMenuRepository;
     private final TimeSlotRepository timeSlotRepository;
-    private final PolicyVersionRepository policyVersionRepository;
     private final RedisLockService redisLockService;
     private final ReservationTransactionService transactionService;
 
@@ -36,19 +33,15 @@ public class ReservationService {
         Staff staff = staffRepository.findById(request.staffId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.STAFF_NOT_FOUND));
 
-        ServiceProduct product = serviceProductRepository.findById(request.productId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+        ServiceMenu menu = serviceMenuRepository.findById(request.menuId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
 
         TimeSlot slot = timeSlotRepository.findByIdAndStoreId(request.slotId(), storeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SLOT_NOT_FOUND));
 
-        PolicyVersion policy = policyVersionRepository
-                .findLatestEffectivePolicy(storeId, LocalDateTime.now())
-                .orElseThrow(() -> new BusinessException(ErrorCode.POLICY_NOT_FOUND));
+        validateCrossReferences(store, staff, menu, slot);
 
-        validateCrossReferences(store, staff, product, slot);
-
-        String lockKey = "salon:slot-lock:" + slot.getStaff().getId() + ":" + slot.getStartAt();
+        String lockKey = "reservation:staff:" + slot.getStaff().getId() + ":start:" + slot.getStartAt();
         String ownerValue = redisLockService.tryLock(lockKey, LOCK_WAIT_TIME_MS, LOCK_LEASE_TIME_MS);
 
         if (ownerValue == null) {
@@ -57,8 +50,8 @@ public class ReservationService {
 
         try {
             Reservation reservation = transactionService.execute(
-                    store, staff, product, request.slotId(), storeId,
-                    policy, request.customerName(), request.customerPhone()
+                    store, staff, menu, request.slotId(), storeId,
+                    request.customerName(), request.customerPhone()
             );
             return ReservationResponse.from(reservation);
         } finally {
@@ -66,12 +59,12 @@ public class ReservationService {
         }
     }
 
-    private void validateCrossReferences(Store store, Staff staff, ServiceProduct product, TimeSlot slot) {
+    private void validateCrossReferences(Store store, Staff staff, ServiceMenu menu, TimeSlot slot) {
         if (!staff.getStore().getId().equals(store.getId())) {
             throw new BusinessException(ErrorCode.STAFF_STORE_MISMATCH);
         }
-        if (!product.getStore().getId().equals(store.getId())) {
-            throw new BusinessException(ErrorCode.PRODUCT_STORE_MISMATCH);
+        if (!menu.getStore().getId().equals(store.getId())) {
+            throw new BusinessException(ErrorCode.MENU_STORE_MISMATCH);
         }
         if (!slot.getStore().getId().equals(store.getId())) {
             throw new BusinessException(ErrorCode.SLOT_STORE_MISMATCH);

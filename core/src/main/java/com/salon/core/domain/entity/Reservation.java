@@ -36,16 +36,12 @@ public class Reservation extends BaseTimeEntity {
     private Staff staff;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private ServiceProduct product;
+    @JoinColumn(name = "menu_id", nullable = false)
+    private ServiceMenu menu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "slot_id")
     private TimeSlot slot;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_version_id", nullable = false)
-    private PolicyVersion policyVersion;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_customer_id")
@@ -71,15 +67,14 @@ public class Reservation extends BaseTimeEntity {
     @Column(length = 500)
     private String cancelReason;
 
-    private Reservation(Store store, Staff staff, ServiceProduct product, TimeSlot slot,
-                        PolicyVersion policyVersion, ReservationCustomer reservationCustomer,
+    private Reservation(Store store, Staff staff, ServiceMenu menu, TimeSlot slot,
+                        ReservationCustomer reservationCustomer,
                         String customerName, String customerPhoneHash,
                         LocalDateTime startAt, LocalDateTime endAt, ReservationStatus status) {
         this.store = store;
         this.staff = staff;
-        this.product = product;
+        this.menu = menu;
         this.slot = slot;
-        this.policyVersion = policyVersion;
         this.reservationCustomer = reservationCustomer;
         this.customerName = customerName;
         this.customerPhoneHash = customerPhoneHash;
@@ -88,11 +83,28 @@ public class Reservation extends BaseTimeEntity {
         this.status = status;
     }
 
-    public static Reservation create(Store store, Staff staff, ServiceProduct product, TimeSlot slot,
-                                      PolicyVersion policyVersion, ReservationCustomer reservationCustomer,
-                                      String customerName, String customerPhoneHash,
-                                      LocalDateTime startAt, LocalDateTime endAt, ReservationStatus status) {
-        return new Reservation(store, staff, product, slot, policyVersion, reservationCustomer,
+    public static Reservation create(Store store, Staff staff, ServiceMenu menu, TimeSlot slot,
+                                     ReservationCustomer reservationCustomer,
+                                     String customerName, String customerPhoneHash,
+                                     LocalDateTime startAt, LocalDateTime endAt, ReservationStatus status) {
+        return new Reservation(store, staff, menu, slot, reservationCustomer,
                 customerName, customerPhoneHash, startAt, endAt, status);
+    }
+
+    public void confirm() {
+        this.status = ReservationStatus.CONFIRMED;
+    }
+
+    public void cancel(String reason) {
+        this.status = ReservationStatus.CANCELED;
+        this.cancelReason = reason;
+    }
+
+    public void markNoShow() {
+        this.status = ReservationStatus.NO_SHOW;
+    }
+
+    public void complete() {
+        this.status = ReservationStatus.COMPLETED;
     }
 }

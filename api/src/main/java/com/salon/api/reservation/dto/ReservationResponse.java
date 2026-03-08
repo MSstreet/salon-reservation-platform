@@ -16,8 +16,8 @@ public class ReservationResponse {
     private final Long storeId;
     private final Long staffId;
     private final String staffName;
-    private final Long productId;
-    private final String productName;
+    private final Long menuId;
+    private final String menuName;
     private final Long slotId;
     private final LocalDateTime startAt;
     private final LocalDateTime endAt;
@@ -31,8 +31,8 @@ public class ReservationResponse {
                 reservation.getStore().getId(),
                 reservation.getStaff().getId(),
                 reservation.getStaff().getName(),
-                reservation.getProduct().getId(),
-                reservation.getProduct().getName(),
+                reservation.getMenu().getId(),
+                reservation.getMenu().getName(),
                 reservation.getSlot() != null ? reservation.getSlot().getId() : null,
                 reservation.getStartAt(),
                 reservation.getEndAt(),

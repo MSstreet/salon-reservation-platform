@@ -16,8 +16,7 @@ import java.util.UUID;
 @Table(name = "reservation_history",
     indexes = {
         @Index(name = "idx_history_store_time", columnList = "store_id, occurred_at"),
-        @Index(name = "idx_history_res_time", columnList = "reservation_id, occurred_at"),
-        @Index(name = "idx_history_type_time", columnList = "event_type, occurred_at")
+        @Index(name = "idx_history_res_time", columnList = "reservation_id, occurred_at")
     })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -68,8 +67,8 @@ public class ReservationHistory {
     }
 
     public static ReservationHistory create(Store store, Reservation reservation, EventType eventType,
-                                             LocalDateTime occurredAt, ActorType actorType, String actorId,
-                                             String payloadJson) {
+                                            LocalDateTime occurredAt, ActorType actorType, String actorId,
+                                            String payloadJson) {
         return new ReservationHistory(store, reservation, eventType, occurredAt, actorType, actorId, payloadJson);
     }
 }

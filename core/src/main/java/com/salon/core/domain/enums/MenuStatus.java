@@ -1,5 +1,5 @@
 package com.salon.core.domain.enums;
 
-public enum ProductStatus {
+public enum MenuStatus {
     ACTIVE, INACTIVE
 }
