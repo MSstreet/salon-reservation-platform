@@ -10,6 +10,7 @@ public enum ErrorCode {
 
     // 409 Conflict
     SLOT_CONFLICT(HttpStatus.CONFLICT, "SLOT_CONFLICT", "해당 슬롯은 이미 예약되었습니다"),
+    SCHEDULE_ALREADY_EXISTS(HttpStatus.CONFLICT, "SCHEDULE_ALREADY_EXISTS", "해당 날짜에 이미 스케줄이 등록되어 있습니다"),
 
     // 503 Service Unavailable
     SLOT_LOCK_FAILURE(HttpStatus.SERVICE_UNAVAILABLE, "SLOT_LOCK_FAILURE", "슬롯 잠금 획득에 실패했습니다. 잠시 후 다시 시도해주세요"),
@@ -29,6 +30,7 @@ public enum ErrorCode {
     SLOT_STAFF_MISMATCH(HttpStatus.BAD_REQUEST, "SLOT_STAFF_MISMATCH", "슬롯이 해당 스태프의 것이 아닙니다"),
     RESERVATION_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "RESERVATION_CANNOT_CANCEL", "취소할 수 없는 예약 상태입니다"),
     RESERVATION_INVALID_STATUS(HttpStatus.BAD_REQUEST, "RESERVATION_INVALID_STATUS", "유효하지 않은 예약 상태 전이입니다"),
+    DEPOSIT_INVALID_STATUS(HttpStatus.BAD_REQUEST, "DEPOSIT_INVALID_STATUS", "처리할 수 없는 예약금 상태입니다"),
 
     // ReservationCustomer
     RESERVATION_CUSTOMER_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION_CUSTOMER_NOT_FOUND", "예약 고객을 찾을 수 없습니다");

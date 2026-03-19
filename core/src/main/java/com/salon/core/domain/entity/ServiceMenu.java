@@ -54,4 +54,8 @@ public class ServiceMenu extends BaseTimeEntity {
     public static ServiceMenu create(Store store, String name, Integer durationMin, Integer price, MenuStatus status) {
         return new ServiceMenu(store, name, durationMin, price, status);
     }
+
+    public void toggleStatus() {
+        this.status = (this.status == MenuStatus.ACTIVE) ? MenuStatus.INACTIVE : MenuStatus.ACTIVE;
+    }
 }
