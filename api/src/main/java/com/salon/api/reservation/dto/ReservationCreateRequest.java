@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 public record ReservationCreateRequest(
         @NotNull Long slotId,
         @NotNull Long staffId,
-        @NotNull Long productId,
+        @NotNull Long menuId,
         @NotBlank String customerName,
         @NotBlank String customerPhone
 ) {

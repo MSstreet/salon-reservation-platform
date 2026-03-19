@@ -1,6 +1,6 @@
 package com.salon.core.domain.entity;
 
-import com.salon.core.domain.enums.ProductStatus;
+import com.salon.core.domain.enums.MenuStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,20 +9,20 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(name = "service_product",
+@Table(name = "service_menu",
     indexes = {
-        @Index(name = "idx_product_store", columnList = "store_id")
+        @Index(name = "idx_menu_store", columnList = "store_id")
     },
     uniqueConstraints = {
-        @UniqueConstraint(name = "uq_product_store_name", columnNames = {"store_id", "name"})
+        @UniqueConstraint(name = "uq_menu_store_name", columnNames = {"store_id", "name"})
     })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ServiceProduct extends BaseTimeEntity {
+public class ServiceMenu extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
+    @Column(name = "menu_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,9 +41,9 @@ public class ServiceProduct extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
-    private ProductStatus status;
+    private MenuStatus status;
 
-    private ServiceProduct(Store store, String name, Integer durationMin, Integer price, ProductStatus status) {
+    private ServiceMenu(Store store, String name, Integer durationMin, Integer price, MenuStatus status) {
         this.store = store;
         this.name = name;
         this.durationMin = durationMin;
@@ -51,7 +51,7 @@ public class ServiceProduct extends BaseTimeEntity {
         this.status = status;
     }
 
-    public static ServiceProduct create(Store store, String name, Integer durationMin, Integer price, ProductStatus status) {
-        return new ServiceProduct(store, name, durationMin, price, status);
+    public static ServiceMenu create(Store store, String name, Integer durationMin, Integer price, MenuStatus status) {
+        return new ServiceMenu(store, name, durationMin, price, status);
     }
 }
