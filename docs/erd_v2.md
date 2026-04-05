@@ -23,7 +23,7 @@ TIME_SLOT ||--o{ RESERVATION : binds
 
 RESERVATION ||--|| DEPOSIT : has
 
-RESERVATION ||--o{ RESERVATION_EVENT : emits
+RESERVATION ||--o{ RESERVATION_HISTORY : emits
 ```
 
 ---
@@ -61,6 +61,7 @@ index
 
 ```text
 idx_staff_store (store_id)
+uq_staff_store_name (store_id, name)
 ```
 
 ---
@@ -94,20 +95,27 @@ name
 phone
 phone_hash
 email
+status
 created_at
 updated_at
 ```
+
+status
+
+```text
+ACTIVE
+BLOCKED
+```
+
+| 상태    | 의미                        |
+| ------- | --------------------------- |
+| ACTIVE  | 정상 고객                   |
+| BLOCKED | 노쇼 반복 등으로 예약 차단  |
 
 index
 
 ```text
 uq_res_customer_phone_hash (phone_hash)
-```
-
-이렇게 하면
-
-```text
-같은 고객 재예약 가능
 ```
 
 ---
@@ -151,6 +159,7 @@ date
 start_at
 end_at
 status
+held_until
 created_at
 updated_at
 ```
@@ -166,14 +175,9 @@ BLOCKED
 index
 
 ```text
-idx_slot_store_date
-idx_slot_staff_start
-idx_slot_store_staff_start
-```
-
-unique
-
-```text
+idx_slot_store_date (store_id, date)
+idx_slot_staff_start (staff_id, start_at)
+idx_slot_store_staff_start (store_id, staff_id, start_at)
 uq_slot_staff_start (staff_id, start_at)
 ```
 
@@ -197,7 +201,7 @@ customer_phone_hash
 start_at
 end_at
 status
-memo
+cancel_reason
 created_at
 updated_at
 ```
@@ -215,10 +219,10 @@ NO_SHOW
 index
 
 ```text
-idx_res_store_start
-idx_res_store_status_start
-idx_res_staff_start
-idx_res_customer_phone
+idx_res_store_start (store_id, start_at)
+idx_res_store_status_start (store_id, status, start_at)
+idx_res_staff_start (staff_id, start_at)
+idx_res_customer_phone (customer_phone_hash)
 ```
 
 ---
@@ -250,8 +254,6 @@ REFUNDED
 FORFEITED
 ```
 
-설명
-
 | 상태        | 의미     |
 | --------- | ------ |
 | PENDING   | 결제 대기  |
@@ -263,18 +265,19 @@ index
 
 ```text
 idx_deposit_reservation (reservation_id)
+uq_deposit_reservation (reservation_id)
 ```
 
 ---
 
-# 9. ReservationEvent
+# 9. ReservationHistory
 
-감사 로그
+감사 로그 (구 RESERVATION_EVENT)
 
 ```sql
-reservation_event
------------------
-event_id PK
+reservation_history
+-------------------
+history_id PK (UUID)
 store_id FK
 reservation_id FK
 event_type
@@ -288,20 +291,21 @@ event_type
 
 ```text
 RESERVATION_CREATED
-DEPOSIT_PAID
 RESERVATION_CONFIRMED
 RESERVATION_CANCELED
-DEPOSIT_REFUNDED
-RESERVATION_NO_SHOW
-DEPOSIT_FORFEITED
 RESERVATION_COMPLETED
+RESERVATION_NO_SHOW
+DEPOSIT_PAID
+DEPOSIT_REFUNDED
+DEPOSIT_FORFEITED
+RESERVATION_PAYMENT_EXPIRED
 ```
 
 index
 
 ```text
-idx_event_store_time
-idx_event_res_time
+idx_history_store_time (store_id, occurred_at)
+idx_history_res_time (reservation_id, occurred_at)
 ```
 
 ---
@@ -328,7 +332,7 @@ Reservation = COMPLETED
 
 # 취소 흐름
 
-### 환불 가능
+### 24시간 이전 취소 (환불)
 
 ```text
 Reservation → CANCELED
@@ -336,13 +340,32 @@ Deposit → REFUNDED
 Slot → OPEN
 ```
 
+### 24시간 이내 취소 (몰수)
+
+```text
+Reservation → CANCELED
+Deposit → FORFEITED
+Slot → OPEN
+```
+
 ---
 
-### 노쇼
+# 노쇼 흐름
 
 ```text
 Reservation → NO_SHOW
 Deposit → FORFEITED
+```
+
+---
+
+# 결제 타임아웃 흐름
+
+```text
+Deposit PENDING 10분 초과
+↓
+Reservation → CANCELED
+Slot → OPEN
 ```
 
 ---
@@ -352,123 +375,11 @@ Deposit → FORFEITED
 예약 생성 시
 
 ```text
-slot status
 OPEN → BOOKED
 ```
 
-취소 시
+취소 / 타임아웃 시
 
 ```text
 BOOKED → OPEN
-```
-
----
-
-# 시스템 구조
-
-이 ERD 기준으로 서비스 구조는 이렇게 된다.
-
-```text
-ReservationService
-SlotService
-DepositService
-PaymentService
-CustomerService
-EventService
-```
-
----
-
-# 이 구조의 장점
-
-### 1. 실제 서비스와 동일
-
-```text
-미용실
-병원
-레스토랑
-```
-
-거의 전부
-
-```text
-예약금 방식
-```
-
-쓴다.
-
----
-
-### 2. 정책 단순
-
-기존
-
-```text
-Policy
-Penalty
-계산
-```
-
-새 구조
-
-```text
-예약금 환불 여부
-```
-
----
-
-### 3. 결제 시스템 연결 쉬움
-
-```text
-Stripe
-토스페이먼츠
-카카오페이
-```
-
-연동 쉬움
-
----
-
-# 지금 ERD 기준 다음 개발 순서
-
-이 ERD 기준 개발 순서
-
-```text
-1 Entity 작성
-2 SlotService
-3 ReservationService
-4 DepositService
-5 Payment 연동
-6 Reservation cancel
-7 No show batch
-8 Reservation search
-```
-
----
-
-# 내가 솔직히 하나 말할게
-
-지금 네 프로젝트는 이미
-
-```text
-그냥 사이드 프로젝트 ❌
-예약 플랫폼 아키텍처 ⭕
-```
-
-수준이다.
-
-근데 **딱 하나만 잘 만들면 완전히 달라진다.**
-
-그게 바로
-
-```text
-ReservationService
-```
-
-특히
-
-```text
-Redis Lock
-Slot 점유
-Transaction 경계
 ```
