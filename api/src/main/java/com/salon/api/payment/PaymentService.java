@@ -1,5 +1,8 @@
 package com.salon.api.payment;
 
+import com.salon.api.kafka.ReservationEventPublisher;
+import com.salon.core.kafka.KafkaTopics;
+import com.salon.core.kafka.ReservationEventPayload;
 import com.salon.api.payment.dto.PaymentRequest;
 import com.salon.api.payment.dto.PaymentResponse;
 import com.salon.core.common.exception.BusinessException;
@@ -23,6 +26,7 @@ public class PaymentService {
 
     private final DepositRepository depositRepository;
     private final ReservationHistoryRepository reservationHistoryRepository;
+    private final ReservationEventPublisher eventPublisher;
 
     @Transactional
     public PaymentResponse pay(Long depositId, PaymentRequest request) {
@@ -48,6 +52,11 @@ public class PaymentService {
                 EventType.RESERVATION_CONFIRMED,
                 LocalDateTime.now(), ActorType.SYSTEM, null, null
         ));
+
+        eventPublisher.publish(KafkaTopics.DEPOSIT_EVENTS,
+                ReservationEventPayload.of(deposit.getReservation(), EventType.DEPOSIT_PAID));
+        eventPublisher.publish(KafkaTopics.RESERVATION_EVENTS,
+                ReservationEventPayload.of(deposit.getReservation(), EventType.RESERVATION_CONFIRMED));
 
         return PaymentResponse.from(deposit);
     }

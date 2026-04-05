@@ -1,5 +1,8 @@
 package com.salon.api.reservation;
 
+import com.salon.api.kafka.ReservationEventPublisher;
+import com.salon.core.kafka.KafkaTopics;
+import com.salon.core.kafka.ReservationEventPayload;
 import com.salon.core.domain.entity.*;
 import com.salon.core.domain.enums.ActorType;
 import com.salon.core.domain.enums.EventType;
@@ -21,6 +24,7 @@ public class ReservationTransactionService {
     private final ReservationRepository reservationRepository;
     private final DepositRepository depositRepository;
     private final ReservationHistoryRepository reservationHistoryRepository;
+    private final ReservationEventPublisher eventPublisher;
 
     @Transactional
     public Reservation execute(Store store, Staff staff, ServiceMenu menu,
@@ -53,6 +57,9 @@ public class ReservationTransactionService {
         );
         reservationHistoryRepository.save(createdHistory);
         reservationHistoryRepository.save(depositHistory);
+
+        eventPublisher.publish(KafkaTopics.RESERVATION_EVENTS,
+                ReservationEventPayload.of(reservation, EventType.RESERVATION_CREATED));
 
         return reservation;
     }

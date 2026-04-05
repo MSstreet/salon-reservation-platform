@@ -27,6 +27,14 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationCancelService reservationCancelService;
 
+    @Operation(summary = "예약 상세 조회")
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<ApiResponse<ReservationResponse>> getById(
+            @Parameter(description = "매장 ID", example = "1") @PathVariable Long storeId,
+            @Parameter(description = "예약 ID", example = "1") @PathVariable Long reservationId) {
+        return ResponseEntity.ok(ApiResponse.success(reservationService.getById(storeId, reservationId)));
+    }
+
     @Operation(summary = "예약 목록 조회", description = "status, date, staffId 로 필터링 가능")
     @GetMapping
     public ResponseEntity<ApiResponse<List<ReservationResponse>>> getList(

@@ -44,6 +44,13 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public ReservationResponse getById(Long storeId, Long reservationId) {
+        Reservation reservation = reservationRepository.findByIdAndStoreId(reservationId, storeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+        return ReservationResponse.from(reservation);
+    }
+
     public ReservationResponse createReservation(Long storeId, ReservationCreateRequest request,
                                                  String idempotencyKey) {
         if (idempotencyKey != null) {

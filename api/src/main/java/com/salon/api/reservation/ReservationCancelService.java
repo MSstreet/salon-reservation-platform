@@ -1,5 +1,8 @@
 package com.salon.api.reservation;
 
+import com.salon.api.kafka.ReservationEventPublisher;
+import com.salon.core.kafka.KafkaTopics;
+import com.salon.core.kafka.ReservationEventPayload;
 import com.salon.api.reservation.dto.ReservationResponse;
 import com.salon.core.common.exception.BusinessException;
 import com.salon.core.common.exception.ErrorCode;
@@ -31,6 +34,7 @@ public class ReservationCancelService {
     private final DepositRepository depositRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ReservationHistoryRepository reservationHistoryRepository;
+    private final ReservationEventPublisher eventPublisher;
 
     @Transactional
     public ReservationResponse cancel(Long storeId, Long reservationId, String reason) {
@@ -59,6 +63,11 @@ public class ReservationCancelService {
                 depositEvent,
                 LocalDateTime.now(), ActorType.SYSTEM, null, null
         ));
+
+        eventPublisher.publish(KafkaTopics.RESERVATION_EVENTS,
+                ReservationEventPayload.of(reservation, EventType.RESERVATION_CANCELED));
+        eventPublisher.publish(KafkaTopics.DEPOSIT_EVENTS,
+                ReservationEventPayload.of(reservation, depositEvent));
 
         return ReservationResponse.from(reservation);
     }
