@@ -13,15 +13,17 @@ public class StoreResponse {
     private final String name;
     private final StoreStatus status;
     private final String timezone;
+    private final String address;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    private StoreResponse(Long id, String name, StoreStatus status, String timezone,
+    private StoreResponse(Long id, String name, StoreStatus status, String timezone, String address,
                           LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.timezone = timezone;
+        this.address = address;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -32,6 +34,7 @@ public class StoreResponse {
                 store.getName(),
                 store.getStatus(),
                 store.getTimezone(),
+                store.getAddress(),
                 store.getCreatedAt(),
                 store.getUpdatedAt()
         );

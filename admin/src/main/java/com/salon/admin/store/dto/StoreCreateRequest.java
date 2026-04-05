@@ -17,4 +17,7 @@ public class StoreCreateRequest {
     @Schema(description = "타임존 (IANA)", example = "Asia/Seoul")
     @NotBlank
     private String timezone;
+
+    @Schema(description = "매장 주소", example = "서울시 강남구 테헤란로 123")
+    private String address;
 }
