@@ -8,9 +8,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Tag(name = "StaffSchedule (Admin)", description = "근무 스케줄 관리 API (관리자 전용)")
 @RestController
@@ -19,6 +23,18 @@ import org.springframework.web.bind.annotation.*;
 public class StaffScheduleAdminController {
 
     private final StaffScheduleAdminService staffScheduleAdminService;
+
+    @Operation(summary = "근무 스케줄 조회", description = "date, staffId 로 필터링 가능")
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<StaffScheduleResponse>>> getSchedules(
+            @Parameter(description = "매장 ID", example = "1") @PathVariable Long storeId,
+            @Parameter(description = "조회 날짜 (yyyy-MM-dd)", example = "2025-04-01")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @Parameter(description = "스태프 ID", example = "1")
+            @RequestParam(required = false) Long staffId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                staffScheduleAdminService.getSchedules(storeId, date, staffId)));
+    }
 
     @Operation(
         summary = "근무 스케줄 등록",

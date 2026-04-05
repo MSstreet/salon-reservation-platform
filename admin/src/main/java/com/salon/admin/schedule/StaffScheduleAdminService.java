@@ -14,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class StaffScheduleAdminService {
@@ -21,6 +24,13 @@ public class StaffScheduleAdminService {
     private final StoreRepository storeRepository;
     private final StaffRepository staffRepository;
     private final StaffScheduleRepository staffScheduleRepository;
+
+    @Transactional(readOnly = true)
+    public List<StaffScheduleResponse> getSchedules(Long storeId, LocalDate date, Long staffId) {
+        return staffScheduleRepository.search(storeId, date, staffId).stream()
+                .map(StaffScheduleResponse::from)
+                .toList();
+    }
 
     @Transactional
     public StaffScheduleResponse create(Long storeId, StaffScheduleCreateRequest request) {
