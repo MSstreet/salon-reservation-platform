@@ -33,7 +33,14 @@ public enum ErrorCode {
     DEPOSIT_INVALID_STATUS(HttpStatus.BAD_REQUEST, "DEPOSIT_INVALID_STATUS", "처리할 수 없는 예약금 상태입니다"),
 
     // ReservationCustomer
-    RESERVATION_CUSTOMER_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION_CUSTOMER_NOT_FOUND", "예약 고객을 찾을 수 없습니다");
+    RESERVATION_CUSTOMER_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION_CUSTOMER_NOT_FOUND", "예약 고객을 찾을 수 없습니다"),
+
+    // StaffMenu
+    STAFF_MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "STAFF_MENU_NOT_FOUND", "디자이너에게 등록된 메뉴를 찾을 수 없습니다"),
+    STAFF_MENU_ALREADY_EXISTS(HttpStatus.CONFLICT, "STAFF_MENU_ALREADY_EXISTS", "이미 등록된 메뉴입니다"),
+
+    // Auth
+    REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_INVALID", "유효하지 않거나 만료된 리프레시 토큰입니다");
 
     private final HttpStatus httpStatus;
     private final String code;
