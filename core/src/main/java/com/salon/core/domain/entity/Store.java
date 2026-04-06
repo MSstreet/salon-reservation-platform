@@ -33,19 +33,24 @@ public class Store extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String timezone;
 
-    private Store(String name, StoreStatus status, String timezone) {
+    @Column(length = 255)
+    private String address;
+
+    private Store(String name, StoreStatus status, String timezone, String address) {
         this.name = name;
         this.status = status;
         this.timezone = timezone;
+        this.address = address;
     }
 
-    public static Store create(String name, StoreStatus status, String timezone) {
-        return new Store(name, status, timezone);
+    public static Store create(String name, StoreStatus status, String timezone, String address) {
+        return new Store(name, status, timezone, address);
     }
 
-    public void update(String name, StoreStatus status, String timezone) {
+    public void update(String name, StoreStatus status, String timezone, String address) {
         this.name = name;
         this.status = status;
         this.timezone = timezone;
+        this.address = address;
     }
 }

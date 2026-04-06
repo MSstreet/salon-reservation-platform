@@ -39,7 +39,7 @@ public class StoreAdminService {
 
     @Transactional
     public StoreResponse create(StoreCreateRequest request) {
-        Store store = Store.create(request.getName(), StoreStatus.ACTIVE, request.getTimezone());
+        Store store = Store.create(request.getName(), StoreStatus.ACTIVE, request.getTimezone(), request.getAddress());
         return StoreResponse.from(storeRepository.save(store));
     }
 
@@ -47,7 +47,7 @@ public class StoreAdminService {
     public StoreResponse update(Long storeId, StoreUpdateRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new EntityNotFoundException("Store not found: " + storeId));
-        store.update(request.getName(), request.getStatus(), request.getTimezone());
+        store.update(request.getName(), request.getStatus(), request.getTimezone(), request.getAddress());
         return StoreResponse.from(store);
     }
 }

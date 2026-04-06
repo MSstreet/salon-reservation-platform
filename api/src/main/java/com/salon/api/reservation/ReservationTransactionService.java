@@ -1,44 +1,44 @@
 package com.salon.api.reservation;
 
-import com.salon.core.common.exception.BusinessException;
-import com.salon.core.common.exception.ErrorCode;
+import com.salon.api.kafka.ReservationEventPublisher;
+import com.salon.core.kafka.KafkaTopics;
+import com.salon.core.kafka.ReservationEventPayload;
 import com.salon.core.domain.entity.*;
 import com.salon.core.domain.enums.ActorType;
-import com.salon.core.domain.enums.DepositStatus;
 import com.salon.core.domain.enums.EventType;
 import com.salon.core.domain.enums.ReservationStatus;
 import com.salon.core.domain.repository.DepositRepository;
 import com.salon.core.domain.repository.ReservationHistoryRepository;
 import com.salon.core.domain.repository.ReservationRepository;
-import com.salon.core.domain.repository.TimeSlotRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationTransactionService {
 
-    private final TimeSlotRepository timeSlotRepository;
     private final ReservationRepository reservationRepository;
     private final DepositRepository depositRepository;
     private final ReservationHistoryRepository reservationHistoryRepository;
+    private final ReservationEventPublisher eventPublisher;
 
     @Transactional
     public Reservation execute(Store store, Staff staff, ServiceMenu menu,
-                               Long slotId, Long storeId,
+                               List<TimeSlot> slots,
                                String customerName, String customerPhoneHash) {
-        TimeSlot slot = timeSlotRepository.findByIdAndStoreId(slotId, storeId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.SLOT_NOT_FOUND));
+        slots.forEach(TimeSlot::book);
 
-        slot.book();
+        TimeSlot firstSlot = slots.get(0);
+        LocalDateTime endAt = firstSlot.getStartAt().plusMinutes(menu.getDurationMin());
 
         Reservation reservation = Reservation.create(
-                store, staff, menu, slot, null,
+                store, staff, menu, firstSlot, null,
                 customerName, customerPhoneHash,
-                slot.getStartAt(), slot.getEndAt(),
+                firstSlot.getStartAt(), endAt,
                 ReservationStatus.REQUESTED
         );
         reservationRepository.save(reservation);
@@ -57,6 +57,9 @@ public class ReservationTransactionService {
         );
         reservationHistoryRepository.save(createdHistory);
         reservationHistoryRepository.save(depositHistory);
+
+        eventPublisher.publish(KafkaTopics.RESERVATION_EVENTS,
+                ReservationEventPayload.of(reservation, EventType.RESERVATION_CREATED));
 
         return reservation;
     }

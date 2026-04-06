@@ -6,8 +6,10 @@ import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientA
 import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableJpaAuditing
+@EnableScheduling
 @SpringBootApplication(
     scanBasePackages = {"com.salon.core", "com.salon.api"},
     exclude = {

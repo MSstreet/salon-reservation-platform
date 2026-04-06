@@ -53,4 +53,8 @@ public class Staff extends BaseTimeEntity {
     public static Staff create(Store store, String name, StaffRole role, StaffStatus status) {
         return new Staff(store, name, role, status);
     }
+
+    public void changeStatus(StaffStatus status) {
+        this.status = status;
+    }
 }

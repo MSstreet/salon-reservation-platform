@@ -77,4 +77,8 @@ public class TimeSlot extends BaseTimeEntity {
         }
         this.status = SlotStatus.BOOKED;
     }
+
+    public void open() {
+        this.status = SlotStatus.OPEN;
+    }
 }
